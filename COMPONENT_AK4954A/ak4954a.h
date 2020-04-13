@@ -2,10 +2,10 @@
 * File Name: ak4954a.h
 *
 * Description: This file contains the function prototypes and constants used in
-*  codec.c. This driver is intended for AK4954A.
+*  ak4954a.c. This driver is intended for AK4954A.
 *
 ******************************************************************************
-* Copyright (2019), Cypress Semiconductor Corporation.
+* Copyright (2020), Cypress Semiconductor Corporation.
 ******************************************************************************
 * This software is owned by Cypress Semiconductor Corporation (Cypress) and is
 * protected by and subject to worldwide patent protection (United States and
@@ -32,27 +32,23 @@
 * such use and in doing so indemnifies Cypress against all charges. Use may be
 * limited by and subject to the applicable Cypress software license agreement.
 *****************************************************************************/
-
 #ifndef AK4954A_H
-    #define AK4954A_H    
-    
+    #define AK4954A_H
+
     #include <stdint.h>    
     
-    /* I2C Address of the Codex */
+    /* I2C Address of the Codec */
     #define AK4954A_I2C_ADDR            (0x12u)
 
     #define AK4954A_PACKET_SIZE         (0x02u)
-
-    /* Timeout in Milliseconds for I2C commands */
-    #define AK4954A_I2C_TIMEOUT_MS      (50u)
-    
+   
     /* I2C Callback typedef */
     typedef uint32_t (*ak4954a_transmit_callback)(uint8_t reg_addr, uint8_t data);
 
     /**************************************************************************************************
     * Register Addresses for AK4954A I2C Interface
     **************************************************************************************************/
-   
+
     #define AK4954A_REG_PWR_MGMT1       (0x00)  /* Power Management 1 */
     #define AK4954A_REG_PWR_MGMT2       (0x01)  /* Power Management 2 */
     #define AK4954A_REG_SIG_SEL1        (0x02)  /* Signal Select 1 */
@@ -75,7 +71,7 @@
     #define AK4954A_REG_VOL_CTRL        (0x19)  /* BEEP Volume Control */
     #define AK4954A_REG_DIG_FILT_MODE   (0x1D)  /* Digital Filter Mode */
    
-    /* Register bit settings for AK4954A_REG_PWR_MGMT1 register */    
+    /* Register bit settings for AK4954A_REG_PWR_MGMT1 register */
     #define AK4954A_PWR_MGMT1_PMADL     0x01    /* Microphone Amplifier Lch and ADC Lch Power Management */
     #define AK4954A_PWR_MGMT1_PMADR     0x02    /* Microphone Amplifier Rch and ADC Rch Power Management */
     #define AK4954A_PWR_MGMT1_PMDAC     0x04    /* DAC Power Management */
@@ -84,15 +80,15 @@
     #define AK4954A_PWR_MGMT1_PMVCM     0x40    /* VCOM Power Management */
     #define AK4954A_PWR_MGMT1_PMPFIL    0x80    /* Programmable Filter Block Power Management */
     
-    /* Register bit settings for AK4954A_REG_PWR_MGMT2 register */    
+    /* Register bit settings for AK4954A_REG_PWR_MGMT2 register */
     #define AK4954A_PWR_MGMT2_LOSEL     0x01    /* Stereo Line Output Select */
     #define AK4954A_PWR_MGMT2_PMSL      0x02    /* Speaker Amplifier or Stereo Line Output Power Management */
     #define AK4954A_PWR_MGMT2_PMPLL     0x04    /* PLL Power Management */
     #define AK4954A_PWR_MGMT2_MS        0x08    /* Master/Slave Mode Select */
     #define AK4954A_PWR_MGMT2_PMHPL     0x10    /* Lch Headphone Amplifier and Charge Pump Power Management */
     #define AK4954A_PWR_MGMT2_PMHPR     0x20    /* Rch Headphone Amplifier and Charge Pump Power Management */
-    
-    /* Register bit settings for AK4954A_REG_SIG_SEL1 register */    
+ 
+    /* Register bit settings for AK4954A_REG_SIG_SEL1 register */
     #define AK4954A_SIG_SEL1_MGAIN_0dB  0x04    /* Microphone Amplifier Gain Control equal 0dB */
     #define AK4954A_SIG_SEL1_MGAIN_6dB  0x00    /* Microphone Amplifier Gain Control equal +6dB */
     #define AK4954A_SIG_SEL1_MGAIN_13dB 0x01    /* Microphone Amplifier Gain Control equal +13dB */
@@ -102,8 +98,8 @@
     #define AK4954A_SIG_SEL1_MPSEL      0x10    /* MPWR Output Select */
     #define AK4954A_SIG_SEL1_DACSL      0x20    /* Signal Switch Control from DAC to Speaker or Stereo Line Amplifier */
     #define AK4954A_SIG_SEL1_SLPSN      0x80    /* Speaker or Stereo Line Amplifier Power-Save Mode */
-    
-    /* Register bit settings for AK4954A_REG_SIG_SEL2 register */    
+
+    /* Register bit settings for AK4954A_REG_SIG_SEL2 register */
     #define AK4954A_SIG_SEL2_INR1       0x00    /* ADC Rch Input Source Select (1) */
     #define AK4954A_SIG_SEL2_INR2       0x01    /* ADC Rch Input Source Select (2) */
     #define AK4954A_SIG_SEL2_INR3       0x02    /* ADC Rch Input Source Select (3) */
@@ -114,7 +110,7 @@
     #define AK4954A_SIG_SEL2_SLG_2db    0x40    /* Stereo Line Amplifier Output Gain +2dB */
     #define AK4954A_SIG_SEL2_SLG_4db    0x80    /* Stereo Line Amplifier Output Gain +4dB */
     #define AK4954A_SIG_SEL2_SLG_6db    0xC0    /* Stereo Line Amplifier Output Gain +6dB */
-    
+
     /* Register bit settings for AK4954A_REG_SIG_SEL3 register */
     #define AK4954A_SIG_SEL3_MONO       0x01    /* Monaural mixing setting of the DAC output */
     #define AK4954A_SIG_SEL3_MOFF       0x02    /* Soft Transition Control of "BEEP->Headphone" Connection ON/OFF */
@@ -123,12 +119,12 @@
     #define AK4954A_SIG_SEL3_PTS_4X     0x08    /* Soft Transition Time of "BEEP->Headphone" Connection ON/OFF (3) */
     #define AK4954A_SIG_SEL3_PTS_8X     0x0C    /* Soft Transition Time of "BEEP->Headphone" Connection ON/OFF (4) */
     
-    /* Register bit settings for AK4954A_REG_MODE_CTRL1 register */    
-                                                      /* Audio Interface Format */
+    /* Register bit settings for AK4954A_REG_MODE_CTRL1 register */
+                                                    /* Audio Interface Format */
     #define AK4954A_MODE_CTRL1_DIF_24M_24L    0x00    /* 24-bit MSB / 24-bit LSB */
     #define AK4954A_MODE_CTRL1_DIF_24M_16L    0x01    /* 24-bit MSB / 16-bit LSB */
     #define AK4954A_MODE_CTRL1_DIF_24M_24M    0x02    /* 24-bit MSB / 24-bit MSB */
-    #define AK4954A_MODE_CTRL1_DIF_24_16_I2S  0x04    /* 24/16-bit I2S Compatible */
+    #define AK4954A_MODE_CTRL1_DIF_24_16_I2S  0x03    /* 24/16-bit I2S Compatible */
     #define AK4954A_MODE_CTRL1_DIF_32M_32M    0x06    /* 32-bit MSB / 32-bit MSB */
     #define AK4954A_MODE_CTRL1_DIF_32_I2S     0x07    /* 32-bit I2S Compatible */
     #define AK4954A_MODE_CTRL1_BCK0_32fs      0x00    /* BICK Output Frequency of 32fs */
@@ -141,8 +137,8 @@
     #define AK4954A_MODE_CTRL1_PLL_24MHz      0x00    /* PLL Clock: MCKI at 24MHz */
     #define AK4954A_MODE_CTRL1_PLL_13M5Hz     0x00    /* PLL Clock: MCKI at 13.5MHz */
     #define AK4954A_MODE_CTRL1_PLL_27MHz      0x00    /* PLL Clock: MCKI at 27MHz */
-    
-    /* Register bit settings for AK4954A_REG_MODE_CTRL2 register */    
+
+    /* Register bit settings for AK4954A_REG_MODE_CTRL2 register */
     #define AK4954A_MODE_CTRL2_FS_8kHz        0x00    /* Sampling Rate at 8kHz */
     #define AK4954A_MODE_CTRL2_FS_11k025Hz    0x01    /* Sampling Rate at 11.025kHz */
     #define AK4954A_MODE_CTRL2_FS_12kHz       0x02    /* Sampling Rate at 12kHz */
@@ -159,8 +155,8 @@
     #define AK4954A_MODE_CTRL2_CM_384fs       0x40    /* MCKI Input Frequency at 384fs */
     #define AK4954A_MODE_CTRL2_CM_512fs       0x80    /* MCKI Input Frequency at 512fs */
     #define AK4954A_MODE_CTRL2_CM_1024fs      0xC0    /* MCKI Input Frequency at 1024fs */
-    
-    /* Register bit settings for AK4954A_REG_MODE_CTRL3 register */    
+
+    /* Register bit settings for AK4954A_REG_MODE_CTRL3 register */
     #define AK4954A_MODE_CTRL3_LPDA     0x01    /* Low-Power Consumption Mode of DAC + HP */
     #define AK4954A_MODE_CTRL3_LPMIC    0x02    /* Low-Power Consumption Mode of Microphone Amplifier */
     #define AK4954A_MODE_CTRL3_IVOLC    0x04    /* Input Digital Volume Control Mode Select */
@@ -168,34 +164,34 @@
     #define AK4954A_MODE_CTRL3_SMUTE    0x20    /* Soft Mute Control */
     #define AK4954A_MODE_CTRL3_THDET    0x40    /* Thermal Shutdown Detection Result */
     #define AK4954A_MODE_CTRL3_OVFL     0x80    /* ADC Overflow Output Enable (OVF Pin) */
-    
-    /* Register bit settings for AK4954A_REG_DIG_FILT_MODE register */    
+
+    /* Register bit settings for AK4954A_REG_DIG_FILT_MODE register */
     #define AK4954A_DIG_FILT_MODE_PFSDO 0x01    /* SDTO Output Signal Select */
     #define AK4954A_DIG_FILT_MODE_ADCPF 0x02    /* Programmable Filter / ALC Input Signal Select */
     #define AK4954A_DIG_FILT_MODE_PFDAC 0x04    /* DAC Input Signal Select */
     #define AK4954A_DIG_FILT_MODE_PMDRC 0x80    /* Dynamic Range Control Circuit Power Management */
     
-    /* Register bit settings for AK4954A_REG_HI_OUT_CTRL register */    
+    /* Register bit settings for AK4954A_REG_HI_OUT_CTRL register */
     #define AK4954A_HI_OUT_CTRL_HPZ     0x08    /* Pull-down Setting of HP Amplifier */
-            
+
     /* Wait Delay */
-    #define AK4954A_RESET_WAIT_DELAY_MS             (10)    /* in milli seconds */
+    #define AK4954A_RESET_WAIT_DELAY                (10)     /* in milli seconds */
 
     /* Volume Control Constants */
-    #define AK4954A_HP_DEFAULT_VOLUME               (0xE1)  /* Default Value (+30.0dB) */
-    #define AK4954A_HP_VOLUME_MAX                   (0xF1)  /* Maximum Value (+36.0dB) */    
-    #define AK4954A_HP_VOLUME_MIN                   (0x05)  /* Minimum Value (-52.5dB) */    
-    #define AK4954A_HP_MUTE_VALUE                   (0x00)  /* Writing <= 0x00 mutes the headphone output */
-        
+    #define AK4954A_HP_DEFAULT_VOLUME               (0x0C)  /* Default Value (0.0dB) */
+    #define AK4954A_HP_VOLUME_MAX                   (0x00)  /* Maximum Value (+6.0dB) */
+    #define AK4954A_HP_VOLUME_MIN                   (0x8F)  /* Minimum Value (-65.5dB) */
+    #define AK4954A_HP_MUTE_VALUE                   (0x90)  /* Writing <= 0x90 mutes the headphone output */
+
     /* Default Configuration Values */
     #define AK4954A_DEF_SAMPLING_RATE               AK4954A_MODE_CTRL2_CM_256fs
-    #define AK4954A_DEF_DATA_ALIGNMENT              AK4954A_MODE_CTRL1_DIF_24M_24M    
+    #define AK4954A_DEF_DATA_ALIGNMENT              AK4954A_MODE_CTRL1_DIF_32_I2S
 
     uint32_t ak4954a_init(ak4954a_transmit_callback callback);
     uint32_t ak4954a_adjust_volume(uint8_t volume);
     uint32_t ak4954a_activate(void);
     uint32_t ak4954a_deactivate(void);
-    
+
 #endif /* #ifndef AK4954A_H */
 
 /* [] END OF FILE */

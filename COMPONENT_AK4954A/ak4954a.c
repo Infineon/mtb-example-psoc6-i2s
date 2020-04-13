@@ -4,7 +4,7 @@
 * Description: This file contains the AK4954A codec control APIs.
 *
 ******************************************************************************
-* Copyright (2019), Cypress Semiconductor Corporation.
+* Copyright (2020), Cypress Semiconductor Corporation.
 ******************************************************************************
 * This software is owned by Cypress Semiconductor Corporation (Cypress) and is
 * protected by and subject to worldwide patent protection (United States and
@@ -35,8 +35,6 @@
 #include "ak4954a.h"
 #include "stdbool.h"
 
-#define I2C_WRITE_OPERATION     (0x00)
-
 ak4954a_transmit_callback   ak4954a_transmit;
 
 /*******************************************************************************
@@ -46,7 +44,7 @@ ak4954a_transmit_callback   ak4954a_transmit;
 *   Initializes the codec with default settings.
 *
 * Parameters:  
-*   callback - function to be called when transmitting data
+*	None
 *
 * Return:
 *   uint32_t - I2C master transaction error status 
@@ -58,6 +56,10 @@ uint32_t ak4954a_init(ak4954a_transmit_callback callback)
 
     ak4954a_transmit = callback;
    
+    /* Clear Power Managament 1 register (dummy write) */
+    ret = ak4954a_transmit(AK4954A_REG_PWR_MGMT1, 0x00);
+    if (ret) return ret;
+
     /* Clear Power Managament 1 register */
     ret = ak4954a_transmit(AK4954A_REG_PWR_MGMT1, 0x00);
     if (ret) return ret;
@@ -69,11 +71,7 @@ uint32_t ak4954a_init(ak4954a_transmit_callback callback)
     /* Set sample rate */
     ret = ak4954a_transmit(AK4954A_REG_MODE_CTRL2, AK4954A_DEF_SAMPLING_RATE);
     if (ret) return ret;
-    
-    /* Power-up VCOM */
-    ret = ak4954a_transmit(AK4954A_REG_PWR_MGMT1, AK4954A_PWR_MGMT1_PMVCM);
-    if (ret) return ret;
-    
+        
     /* Clear Digital Filter Mode register */
     return ak4954a_transmit(AK4954A_REG_DIG_FILT_MODE, 0x00);
 }
@@ -83,13 +81,14 @@ uint32_t ak4954a_init(ak4954a_transmit_callback callback)
 ********************************************************************************
 * Summary:
 *   This function updates the volume of both the left and right channels of the
-*   headphone output.
+* 	headphone output.
+*
 *
 * Parameters:  
-*   volume - Steps of 0.375dB, where:
-*            Minimum volume: -52.5dB (0x05)
-*            Maximum volume: +36.0dB (0xF1)
-*            Mute: (0x00)
+*	volume - Steps of 0.5dB, where:
+*            Minimum volume: -65.5dB (0x8F)
+*            Maximum volume:  +6.0dB (0x00)
+*            Mute: (0x90~0xFF)
 *
 * Return:
 *   uint32_t - I2C master transaction error status
@@ -98,13 +97,7 @@ uint32_t ak4954a_init(ak4954a_transmit_callback callback)
 uint32_t ak4954a_adjust_volume(uint8_t volume)
 {
     uint32_t ret;
-    
-    if(volume > AK4954A_HP_VOLUME_MAX)
-    {
-        volume = AK4954A_HP_VOLUME_MAX;
-    }
-
-    /* Send Left Channel Volume */
+    	
     ret = ak4954a_transmit(AK4954A_REG_LCH_DIG_VOL, volume);
     if (ret) return ret;
 
@@ -117,10 +110,10 @@ uint32_t ak4954a_adjust_volume(uint8_t volume)
 ********************************************************************************
 * Summary:
 *   Activates the codec - This function is called in conjunction with 
-*   ak4954a_deactivate API after successful configuration update of the codec.
+*   ak4954A_deactivate API after successful configuration update of the codec.
 *
 * Parameters:  
-*   None
+*	None
 *
 * Return:
 *   uint32_t - I2C master transaction error status
@@ -137,7 +130,7 @@ uint32_t ak4954a_activate(void)
     
     /* Enable Left/Right Channels */
     return ak4954a_transmit(AK4954A_REG_PWR_MGMT2, 
-                            AK4954A_PWR_MGMT2_PMHPL | AK4954A_PWR_MGMT2_PMHPR);
+                           AK4954A_PWR_MGMT2_PMHPL | AK4954A_PWR_MGMT2_PMHPR);
 }
 
 /*******************************************************************************
@@ -149,7 +142,7 @@ uint32_t ak4954a_activate(void)
 *   any setting in the codec over I2C
 *
 * Parameters:  
-*   None
+*	None
 *
 * Return:
 *   uint32_t - I2C master transaction error status

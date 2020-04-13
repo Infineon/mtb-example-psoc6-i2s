@@ -1,14 +1,14 @@
 /******************************************************************************
 * File Name:   main.c
 *
-* Description: This is the source code for the I2S Example
+* Description: This is the source code for the I2S Audio example
 *              for ModusToolbox.
 *
 * Related Document: See Readme.md
 *
 *
 *******************************************************************************
-* (c) (2019), Cypress Semiconductor Corporation. All rights reserved.
+* (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
 *******************************************************************************
 * This software, including source code, documentation and related materials
 * ("Software"), is owned by Cypress Semiconductor Corporation or one of its
@@ -39,7 +39,6 @@
 * indemnify Cypress against all liability.
 *******************************************************************************/
 
-#include "cy_pdl.h"
 #include "cyhal.h"
 #include "cybsp.h"
 
@@ -49,41 +48,58 @@
 /*******************************************************************************
 * Macros
 ********************************************************************************/
+/* Master I2C Settings */
 #define MI2C_TIMEOUT_MS     10u         /* in ms */
-#define MCLK_FREQ_HZ        11250000u   /* in Hz */
+/* Master Clock (MCLK) Settings */
+#define MCLK_FREQ_HZ        4096000u    /* in Hz */
 #define MCLK_DUTY_CYCLE     50.0f       /* in %  */
+/* Clock Seetings */
+#define AUDIO_SYS_CLOCK_HZ  98304000u   /* in Hz */
+/* PWM MCLK Pin */
+#define MCLK_PIN            CYBSP_D0
+/* Debounce delay for the button */
+#define DEBOUNCE_DELAY_MS   10u         /* in ms */
+/* HFCLK1 Clock Divider */
+#define HFCLK1_CLK_DIVIDER  4u
 
 /*******************************************************************************
 * Function Prototypes
 ********************************************************************************/
 cy_rslt_t mi2c_transmit(uint8_t reg_adrr, uint8_t data);
-void i2s_isr_handler(void);
+void i2s_isr_handler(void *arg, cyhal_i2s_event_t event);
+void clock_init(void);
 
 /*******************************************************************************
 * Global Variables
 ********************************************************************************/
-/* Master I2C variables */
+/* HAL Objects */
+cyhal_pwm_t mclk_pwm;
 cyhal_i2c_t mi2c;
+cyhal_i2s_t i2s;
+cyhal_clock_t audio_clock;
+cyhal_clock_t pll_clock;
+cyhal_clock_t fll_clock;
+cyhal_clock_t system_clock;
 
-const cyhal_i2c_cfg_t mi2c_cfg = {
+/* HAL Configs */
+const cyhal_i2c_cfg_t mi2c_config = {
     .is_slave        = false,
     .address         = 0,
     .frequencyhal_hz = 400000
 };
-
-const cy_stc_sysint_t i2s_isr_cfg = {
-#if CY_IP_MXAUDIOSS_INSTANCES == 1
-    .intrSrc = (IRQn_Type) audioss_interrupt_i2s_IRQn,
-#else
-    .intrSrc = (IRQn_Type) audioss_0_interrupt_i2s_IRQn,
-#endif
-    .intrPriority = CYHAL_ISR_PRIORITY_DEFAULT
+const cyhal_i2s_pins_t i2s_pins = {
+    .sck  = P5_1,
+    .ws   = P5_2,
+    .data = P5_3,
 };
-
-uint32_t i2s_count = 0;
-
-/* Master Clock PWM */
-cyhal_pwm_t mclk_pwm;
+const cyhal_i2s_config_t i2s_config = {
+    .is_tx_slave    = false,    /* TX is Master */
+    .is_rx_slave    = false,    /* RX not used */
+    .mclk_hz        = 0,        /* External MCLK not used */
+    .channel_length = 32,       /* In bits */
+    .word_length    = 16,       /* In bits */
+    .sample_rate_hz = 16000,    /* In Hz */
+};
 
 /*******************************************************************************
 * Function Name: main
@@ -117,45 +133,43 @@ int main(void)
     /* Enable global interrupts */
     __enable_irq();
 
+    /* Init the clocks */
+    clock_init();
+
     /* Initialize the User LED */
-    cyhal_gpio_init((cyhal_gpio_t) CYBSP_USER_LED, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, CYBSP_LED_STATE_ON);
+    cyhal_gpio_init(CYBSP_USER_LED, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, CYBSP_LED_STATE_OFF);
 
     /* Initialize the User Button */
-    cyhal_gpio_init((cyhal_gpio_t) CYBSP_USER_BTN, CYHAL_GPIO_DIR_INPUT, CYHAL_GPIO_DRIVE_PULLUP, CYBSP_BTN_OFF);
-    cyhal_gpio_enable_event((cyhal_gpio_t) CYBSP_USER_BTN, CYHAL_GPIO_IRQ_FALL, CYHAL_ISR_PRIORITY_DEFAULT, true);
+    cyhal_gpio_init(CYBSP_USER_BTN, CYHAL_GPIO_DIR_INPUT, CYHAL_GPIO_DRIVE_PULLUP, CYBSP_BTN_OFF);
+    /* Enable the button interrupt to wake-up the CPU */
+    cyhal_gpio_enable_event(CYBSP_USER_BTN, CYHAL_GPIO_IRQ_FALL, CYHAL_ISR_PRIORITY_DEFAULT, true);
 
     /* Initialize the Master Clock with a PWM */
-    cyhal_pwm_init(&mclk_pwm, (cyhal_gpio_t) P5_0, NULL);
+    cyhal_pwm_init(&mclk_pwm, MCLK_PIN, NULL);
     cyhal_pwm_set_duty_cycle(&mclk_pwm, MCLK_DUTY_CYCLE, MCLK_FREQ_HZ);
     cyhal_pwm_start(&mclk_pwm);
 
     /* Wait for the MCLK to clock the audio codec */
-    Cy_SysLib_Delay(1);
+    cyhal_system_delay_ms(1);
 
     /* Initialize the I2C Master */
     cyhal_i2c_init(&mi2c, CYBSP_I2C_SDA, CYBSP_I2C_SCL, NULL);
-    cyhal_i2c_configure(&mi2c, &mi2c_cfg);
-
-    /* Initialize the I2S interrupt */
-    Cy_SysInt_Init(&i2s_isr_cfg, i2s_isr_handler);
-    NVIC_EnableIRQ(i2s_isr_cfg.intrSrc);   
+    cyhal_i2c_configure(&mi2c, &mi2c_config);
 
     /* Initialize the I2S */
-    Cy_I2S_Init(CYBSP_I2S_HW, &CYBSP_I2S_config);
-    Cy_I2S_ClearTxFifo(CYBSP_I2S_HW);
-    /* Put at least one frame into the Tx FIFO */
-    Cy_I2S_WriteTxData(CYBSP_I2S_HW, 0UL);
-    Cy_I2S_WriteTxData(CYBSP_I2S_HW, 0UL);
-    /* Enable the I2S interface */
-    Cy_I2S_EnableTx(CYBSP_I2S_HW);
-    /* Clear possible pending interrupts */
-    Cy_I2S_ClearInterrupt(CYBSP_I2S_HW, CY_I2S_INTR_TX_TRIGGER);
-    /* Enable I2S interrupts */
-    Cy_I2S_SetInterruptMask(CYBSP_I2S_HW, CY_I2S_INTR_TX_TRIGGER);
-
+    cyhal_i2s_init(&i2s, &i2s_pins, NULL, NC, &i2s_config, &audio_clock);
+    cyhal_i2s_register_callback(&i2s, i2s_isr_handler, NULL);
+    cyhal_i2s_enable_event(&i2s, CYHAL_I2S_ASYNC_TX_COMPLETE, CYHAL_ISR_PRIORITY_DEFAULT, true);
+    
     /* Configure the AK494A codec and enable it */
-    ak4954a_init(mi2c_transmit);
+    result = ak4954a_init(mi2c_transmit);
+    /* If the initialization fails, reset the device */
+    if (result != 0)
+    {
+        NVIC_SystemReset();
+    }
     ak4954a_activate();
+    ak4954a_adjust_volume(AK4954A_HP_DEFAULT_VOLUME);
 
     for(;;)
     {
@@ -164,23 +178,25 @@ int main(void)
         /* Check if the button was pressed */
         if (cyhal_gpio_read(CYBSP_USER_BTN) == CYBSP_BTN_PRESSED)
         {
-            /* Invert the USER LED state */
-            cyhal_gpio_toggle((cyhal_gpio_t) CYBSP_USER_LED);
-
-            Cy_SysLib_Delay(500);
-
-            /* Check if the I2S ISR is disabled */
-            if (!NVIC_GetEnableIRQ(i2s_isr_cfg.intrSrc))
+            /* Check if I2S is transmitting */
+            if (cyhal_i2s_is_write_pending(&i2s))
             {
-                /* Turn ON the USER LED */
-                cyhal_gpio_write((cyhal_gpio_t) CYBSP_USER_LED, CYBSP_LED_STATE_ON);
-
-                /* Restart the audio track counter */
-                i2s_count = 0;
-
-                /* Re-enable the I2S ISR */
-                NVIC_EnableIRQ(i2s_isr_cfg.intrSrc);
+                /* If already transmitting, don't do anything */
             }
+            else
+            {
+                /* Start the I2S TX */
+                cyhal_i2s_start_tx(&i2s);
+
+                /* If not transmitting, initiate a transfer */
+                cyhal_i2s_write_async(&i2s, wave_data, WAVE_SIZE);
+
+                /* Turn ON LED to show a transmission */
+                cyhal_gpio_write(CYBSP_USER_LED, CYBSP_LED_STATE_ON);
+            }
+
+            /* Debounce delay */
+            cyhal_system_delay_ms(DEBOUNCE_DELAY_MS);
         }
     }
 }
@@ -209,43 +225,71 @@ cy_rslt_t mi2c_transmit(uint8_t reg_addr, uint8_t data)
     buffer[1] = data;
 
     /* Send the data over the I2C */
-    result = cyhal_i2c_master_write(&mi2c, AK4954A_I2C_ADDR, buffer, 2, MI2C_TIMEOUT_MS, true);
+    result = cyhal_i2c_master_write(&mi2c, 
+                                    AK4954A_I2C_ADDR, 
+                                    buffer, 
+                                    AK4954A_PACKET_SIZE, 
+                                    MI2C_TIMEOUT_MS, 
+                                    true);
 
     return result;
 }
 
 /*******************************************************************************
 * Function Name: i2s_isr_handler
-****************************************************************************//**
+********************************************************************************
+* Summary:
+*  I2S ISR handler. Stop the I2S TX and turn OFF the User LED.
 *
-* I2S Interrupt Handler Implementation. Feed the I2S internal FIFO with audio
-* data.
-*  
+* Parameters:
+*  arg: not used
+*  event: event that occurred
+*
 *******************************************************************************/
-void i2s_isr_handler(void)
-{   
-    /* Write data for the left side */
-    Cy_I2S_WriteTxData(CYBSP_I2S_HW, (uint16) wave_data[i2s_count]);
-    
-    /* Write data for the right side */
-    Cy_I2S_WriteTxData(CYBSP_I2S_HW, (uint16) wave_data[i2s_count]);
-            
-    /* If the end of the wave data is reached, stop the ISR, otherwise, increment counter */
-    if (i2s_count < WAVE_SIZE)
-    {
-       i2s_count++; 
-    }   
-    else
-    {
-        /* Disable the ISR */
-        NVIC_DisableIRQ(i2s_isr_cfg.intrSrc);      
+void i2s_isr_handler(void *arg, cyhal_i2s_event_t event)
+{
+    (void) arg;
+    (void) event;
 
-        /* Turn OFF the USER LED */
-        cyhal_gpio_write((cyhal_gpio_t) CYBSP_USER_LED, CYBSP_LED_STATE_OFF);
-    }
+    /* Stop the I2S TX */
+    cyhal_i2s_stop_tx(&i2s);
 
-    /* Clear I2S Interrupt */
-    Cy_I2S_ClearInterrupt(CYBSP_I2S_HW, CY_I2S_INTR_TX_TRIGGER);
+    /* Turn off the LED */
+    cyhal_gpio_write(CYBSP_USER_LED, CYBSP_LED_STATE_OFF);
+}
+
+/*******************************************************************************
+* Function Name: clock_init
+********************************************************************************
+* Summary:
+*  Initialize the clocks in the system.
+*
+*******************************************************************************/
+void clock_init(void)
+{
+    /* Initialize the PLL */
+    cyhal_clock_get(&pll_clock, &CYHAL_CLOCK_PLL[0]);
+    cyhal_clock_init(&pll_clock);
+    cyhal_clock_set_frequency(&pll_clock, AUDIO_SYS_CLOCK_HZ, NULL);
+
+    /* Initialize the audio subsystem clock (HFCLK1) */
+    cyhal_clock_get(&audio_clock, &CYHAL_CLOCK_HF[1]);
+    cyhal_clock_init(&audio_clock);
+    cyhal_clock_set_source(&audio_clock, &pll_clock);
+
+    /* Drop HFCK1 frequency for power savings */
+    cyhal_clock_set_divider(&audio_clock, HFCLK1_CLK_DIVIDER);	
+    cyhal_clock_set_enabled(&audio_clock, true, true);
+
+    /* Initialize the system clock (HFCLK0) */
+    cyhal_clock_get(&system_clock, &CYHAL_CLOCK_HF[0]);
+    cyhal_clock_init(&system_clock);
+    cyhal_clock_set_source(&system_clock, &pll_clock);
+
+    /* Disable the FLL for power savings */
+    cyhal_clock_get(&fll_clock, &CYHAL_CLOCK_FLL);
+    cyhal_clock_init(&fll_clock);
+    cyhal_clock_set_enabled(&fll_clock, false, true);
 }
 
 /* [] END OF FILE */

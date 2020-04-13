@@ -4,7 +4,7 @@
 * Description: This file contains the information about the wave sound track
 *
 ******************************************************************************
-* Copyright (2019), Cypress Semiconductor Corporation.
+* Copyright (2020), Cypress Semiconductor Corporation.
 ******************************************************************************
 * This software is owned by Cypress Semiconductor Corporation (Cypress) and is
 * protected by and subject to worldwide patent protection (United States and
@@ -38,10 +38,10 @@
     #include <stdint.h>
 
     /* Number of elements in the wave sound track */
-    #define WAVE_SIZE 37147u
+    #define WAVE_SIZE 59752u
 
     /* Extern reference to the wave sound track data */
-    extern const uint16_t wave_data[WAVE_SIZE];
+    extern const int16_t wave_data[WAVE_SIZE];
 
 #endif
 
