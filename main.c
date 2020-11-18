@@ -42,21 +42,26 @@
 #include "cyhal.h"
 #include "cybsp.h"
 
-#include "ak4954a.h"
 #include "wave.h"
+
+#ifdef USE_AK4954A
+    #include "mtb_ak4954a.h"
+#endif
 
 /*******************************************************************************
 * Macros
 ********************************************************************************/
 /* Master I2C Settings */
 #define MI2C_TIMEOUT_MS     10u         /* in ms */
+/* Note that we are not able to achieve the desired frequency, so we round up
+*  the frequency values to avoid mismatches */
 /* Master Clock (MCLK) Settings */
-#define MCLK_FREQ_HZ        4096000u    /* in Hz */
+#define MCLK_FREQ_HZ        4083000u    /* in Hz (Ideally 4.096 MHz) */
 #define MCLK_DUTY_CYCLE     50.0f       /* in %  */
-/* Clock Seetings */
-#define AUDIO_SYS_CLOCK_HZ  98304000u   /* in Hz */
+/* Clock Settings */
+#define AUDIO_SYS_CLOCK_HZ  98000000u   /* in Hz (Ideally 98.304 MHz) */
 /* PWM MCLK Pin */
-#define MCLK_PIN            CYBSP_D0
+#define MCLK_PIN            P5_0
 /* Debounce delay for the button */
 #define DEBOUNCE_DELAY_MS   10u         /* in ms */
 /* HFCLK1 Clock Divider */
@@ -65,7 +70,6 @@
 /*******************************************************************************
 * Function Prototypes
 ********************************************************************************/
-cy_rslt_t mi2c_transmit(uint8_t reg_adrr, uint8_t data);
 void i2s_isr_handler(void *arg, cyhal_i2s_event_t event);
 void clock_init(void);
 
@@ -74,7 +78,9 @@ void clock_init(void);
 ********************************************************************************/
 /* HAL Objects */
 cyhal_pwm_t mclk_pwm;
+#ifdef USE_AK4954A
 cyhal_i2c_t mi2c;
+#endif
 cyhal_i2s_t i2s;
 cyhal_clock_t audio_clock;
 cyhal_clock_t pll_clock;
@@ -82,11 +88,13 @@ cyhal_clock_t fll_clock;
 cyhal_clock_t system_clock;
 
 /* HAL Configs */
+#ifdef USE_AK4954A
 const cyhal_i2c_cfg_t mi2c_config = {
     .is_slave        = false,
     .address         = 0,
     .frequencyhal_hz = 400000
 };
+#endif
 const cyhal_i2s_pins_t i2s_pins = {
     .sck  = P5_1,
     .ws   = P5_2,
@@ -152,24 +160,26 @@ int main(void)
     /* Wait for the MCLK to clock the audio codec */
     cyhal_system_delay_ms(1);
 
-    /* Initialize the I2C Master */
-    cyhal_i2c_init(&mi2c, CYBSP_I2C_SDA, CYBSP_I2C_SCL, NULL);
-    cyhal_i2c_configure(&mi2c, &mi2c_config);
-
     /* Initialize the I2S */
     cyhal_i2s_init(&i2s, &i2s_pins, NULL, NC, &i2s_config, &audio_clock);
     cyhal_i2s_register_callback(&i2s, i2s_isr_handler, NULL);
     cyhal_i2s_enable_event(&i2s, CYHAL_I2S_ASYNC_TX_COMPLETE, CYHAL_ISR_PRIORITY_DEFAULT, true);
     
+#ifdef USE_AK4954A
+    /* Initialize the I2C Master */
+    cyhal_i2c_init(&mi2c, CYBSP_I2C_SDA, CYBSP_I2C_SCL, NULL);
+    cyhal_i2c_configure(&mi2c, &mi2c_config);
+
     /* Configure the AK494A codec and enable it */
-    result = ak4954a_init(mi2c_transmit);
+    result = mtb_ak4954a_init(&mi2c);
     /* If the initialization fails, reset the device */
     if (result != 0)
     {
         NVIC_SystemReset();
     }
-    ak4954a_activate();
-    ak4954a_adjust_volume(AK4954A_HP_DEFAULT_VOLUME);
+    mtb_ak4954a_activate();
+    mtb_ak4954a_adjust_volume(AK4954A_HP_VOLUME_DEFAULT);
+#endif
 
     for(;;)
     {
@@ -199,40 +209,6 @@ int main(void)
             cyhal_system_delay_ms(DEBOUNCE_DELAY_MS);
         }
     }
-}
-
-/*******************************************************************************
-* Function Name: mi2c_transmit
-********************************************************************************
-* Summary:
-*  I2C Master function to transmit data to the given address.
-*
-* Parameters:
-*  reg_addr: address to be updated
-*  data: 8-bit data to be written in the register
-*
-* Return:
-*  cy_rslt_t - I2C master transaction error status. 
-*              Returns CY_RSLT_SUCCESS if succeeded.
-*
-*******************************************************************************/
-cy_rslt_t mi2c_transmit(uint8_t reg_addr, uint8_t data)
-{
-    cy_rslt_t result;
-    uint8_t buffer[AK4954A_PACKET_SIZE];
-    
-    buffer[0] = reg_addr;
-    buffer[1] = data;
-
-    /* Send the data over the I2C */
-    result = cyhal_i2c_master_write(&mi2c, 
-                                    AK4954A_I2C_ADDR, 
-                                    buffer, 
-                                    AK4954A_PACKET_SIZE, 
-                                    MI2C_TIMEOUT_MS, 
-                                    true);
-
-    return result;
 }
 
 /*******************************************************************************
@@ -271,6 +247,7 @@ void clock_init(void)
     cyhal_clock_get(&pll_clock, &CYHAL_CLOCK_PLL[0]);
     cyhal_clock_init(&pll_clock);
     cyhal_clock_set_frequency(&pll_clock, AUDIO_SYS_CLOCK_HZ, NULL);
+    cyhal_clock_set_enabled(&pll_clock, true, true);
 
     /* Initialize the audio subsystem clock (HFCLK1) */
     cyhal_clock_get(&audio_clock, &CYHAL_CLOCK_HF[1]);
@@ -278,7 +255,7 @@ void clock_init(void)
     cyhal_clock_set_source(&audio_clock, &pll_clock);
 
     /* Drop HFCK1 frequency for power savings */
-    cyhal_clock_set_divider(&audio_clock, HFCLK1_CLK_DIVIDER);	
+    cyhal_clock_set_divider(&audio_clock, HFCLK1_CLK_DIVIDER);
     cyhal_clock_set_enabled(&audio_clock, true, true);
 
     /* Initialize the system clock (HFCLK0) */
