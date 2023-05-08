@@ -7,7 +7,7 @@
 #
 ################################################################################
 # \copyright
-# Copyright 2018-2022, Cypress Semiconductor Corporation (an Infineon company)
+# Copyright 2018-2023, Cypress Semiconductor Corporation (an Infineon company)
 # SPDX-License-Identifier: Apache-2.0
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -103,10 +103,8 @@ INCLUDES=
 # Add additional defines to the build process (without a leading -D).
 DEFINES=
 
-# Check if the kit is one of the Arduino kits (TFT-028 with AK4954A)
-ifeq ($(TARGET), $(filter $(TARGET), APP_CY8CKIT-062-WIFI-BT APP_CY8CKIT-062S2-43012 APP_CYW9P62S1-43012EVB-01 APP_CYW9P62S1-43438EVB-01 APP_CY8CKIT-064B0S2-4343W APP_CY8CKIT-062-BLE APP_CY8CEVAL-062S2-LAI-4373M2 APP_CY8CEVAL-062S2 APP_CY8CEVAL-062S2-MUR-43439M2))
-  DEFINES+=USE_AK4954A
-endif
+# If the kit is CY8CPROTO-062-4343W or CY8CPROTO-063-BLE remove the 'USE_AK4954A' macro.
+DEFINES+=USE_AK4954A
 
 # Select softfp or hardfp floating point. Default is softfp.
 VFP_SELECT=
@@ -167,11 +165,13 @@ CY_GETLIBS_SHARED_PATH=../
 #
 CY_GETLIBS_SHARED_NAME=mtb_shared
 
-# Absolute path to the compiler's "bin" directory.
-#
+# Absolute path to the compiler's "bin" directory. The variable name depends on the 
+# toolchain used for the build. Refer to the ModusToolbox user guide to get the correct
+# variable name for the toolchain used in your build.
+# 
 # The default depends on the selected TOOLCHAIN (GCC_ARM uses the ModusToolbox
 # software provided compiler by default).
-CY_COMPILER_PATH=
+CY_COMPILER_GCC_ARM_DIR=
 
 
 # Locate ModusToolbox helper tools folders in default installation

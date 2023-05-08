@@ -4,9 +4,9 @@ This example demonstrates how to use the I2S hardware block in PSoC&trade; 6 MCU
 
 ## Overview
 
-This code example shows how to play a short audio clip on a speaker or headphones. The application stores the audio data in the flash memory. This data is written to the output TX FIFO of the I2S hardware block, which interfaces with an audio codec chip.
+This code example shows how to play a short audio clip on a speaker or headphones. The application stores the audio data in flash memory. This data is written to the output TX FIFO of the I2S hardware block, which interfaces with an audio codec chip.
 
-The audio codec chip converts a digital audio stream into analog. The chip is configured by PSoC&trade; 6 MCU over an I2C interface. The code example includes the  [audio-codec-ak4954a](https://github.com/Infineon/audio-codec-ak4954a) library which provides the *mtb_ak4954a.c/h* files that wrap the configuration of the audio codec used in this example.
+The audio codec chip converts a digital audio stream into an analog. The chip is configured by PSoC&trade; 6 MCU over an I2C interface. The code example includes the  [audio-codec-ak4954a](https://github.com/Infineon/audio-codec-ak4954a) library which provides the *mtb_ak4954a.c/h* files that wrap the configuration of the audio codec used in this example.
 
 **Figure 1. Block diagram**
 
@@ -14,14 +14,15 @@ The audio codec chip converts a digital audio stream into analog. The chip is co
 
 [View this README on GitHub.](https://github.com/Infineon/mtb-example-psoc6-i2s)
 
-[Provide feedback on this code example.](https://cypress.co1.qualtrics.com/jfe/form/SV_1NTns53sK2yiljn?Q_EED=eyJVbmlxdWUgRG9jIElkIjoiQ0UyMTg2MzYiLCJTcGVjIE51bWJlciI6IjAwMi0xODYzNiIsIkRvYyBUaXRsZSI6IlBTb0MmdHJhZGU7IDYgTUNVOiBJbnRlci1JQyBzb3VuZCAoSTJTKSBhdWRpbyIsInJpZCI6InJsb3MiLCJEb2MgdmVyc2lvbiI6IjMuMC4wIiwiRG9jIExhbmd1YWdlIjoiRW5nbGlzaCIsIkRvYyBEaXZpc2lvbiI6Ik1DRCIsIkRvYyBCVSI6IklDVyIsIkRvYyBGYW1pbHkiOiJQU09DIn0=)
+[Provide feedback on this code example.](https://cypress.co1.qualtrics.com/jfe/form/SV_1NTns53sK2yiljn?Q_EED=eyJVbmlxdWUgRG9jIElkIjoiQ0UyMTg2MzYiLCJTcGVjIE51bWJlciI6IjAwMi0xODYzNiIsIkRvYyBUaXRsZSI6IlBTb0MmdHJhZGU7IDYgTUNVOiBJbnRlci1JQyBzb3VuZCAoSTJTKSBhdWRpbyIsInJpZCI6InJsb3MiLCJEb2MgdmVyc2lvbiI6IjMuMS4wIiwiRG9jIExhbmd1YWdlIjoiRW5nbGlzaCIsIkRvYyBEaXZpc2lvbiI6Ik1DRCIsIkRvYyBCVSI6IklDVyIsIkRvYyBGYW1pbHkiOiJQU09DIn0=)
+
 
 ## Requirements
 
 - [ModusToolbox&trade; software](https://www.infineon.com/modustoolbox) v3.0 or later (tested with v3.0)
 - Board support package (BSP) minimum required version: 4.0.0
 - Programming language: C
-- Associated parts: All [PSoC&trade; 6 MCU](https://www.infineon.com/cms/en/product/microcontroller/32-bit-psoc-arm-cortex-microcontroller/psoc-6-32-bit-arm-cortex-m4-mcu/) parts, [AIROC™ CYW20735 Bluetooth® & Bluetooth® LE system on chip](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-bluetooth-le-bluetooth-multiprotocol/), [AIROC™ CYW20819 Bluetooth® & Bluetooth® LE system on chip](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-bluetooth-le-bluetooth-multiprotocol/airoc-bluetooth-le-bluetooth/cyw20819/?redirId=204689), [AIROC™ CYW43012 Wi-Fi & Bluetooth® combo chip](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-wi-fi-plus-bluetooth-combos/cyw43012/), [AIROC™ CYW4343W Wi-Fi & Bluetooth® combo chip](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-wi-fi-plus-bluetooth-combos/cyw4343w/), [AIROC™ CYW4373 Wi-Fi & Bluetooth® combo chip](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-wi-fi-plus-bluetooth-combos/cyw4373/), [AIROC™ CYW43439 Wi-Fi & Bluetooth® combo chip](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-wi-fi-plus-bluetooth-combos/cyw43439/)
+- Associated parts: All [PSoC&trade; 6 MCU](https://www.infineon.com/cms/en/product/microcontroller/32-bit-psoc-arm-cortex-microcontroller/psoc-6-32-bit-arm-cortex-m4-mcu/) parts, [AIROC™ CYW20735 Bluetooth® & Bluetooth® LE system on chip](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-bluetooth-le-bluetooth-multiprotocol/), [AIROC™ CYW20819 Bluetooth® & Bluetooth® LE system on chip](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-bluetooth-le-bluetooth-multiprotocol/airoc-bluetooth-le-bluetooth/cyw20819/?redirId=204689), [AIROC™ CYW43012 Wi-Fi & Bluetooth® combo chip](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-wi-fi-plus-bluetooth-combos/cyw43012/), [AIROC™ CYW4343W Wi-Fi & Bluetooth® combo chip](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-wi-fi-plus-bluetooth-combos/cyw4343w/), [AIROC™ CYW4373 Wi-Fi & Bluetooth® combo chip](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-wi-fi-plus-bluetooth-combos/wi-fi-5-802.11ac/cyw4373/), [AIROC™ CYW43439 Wi-Fi & Bluetooth® combo chip](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-wi-fi-plus-bluetooth-combos/cyw43439/)
 
 
 ## Supported toolchains (make variable 'TOOLCHAIN')
@@ -33,20 +34,20 @@ The audio codec chip converts a digital audio stream into analog. The chip is co
 
 ## Supported kits (make variable 'TARGET')
 
-- [PSoC&trade; 6 Wi-Fi Bluetooth&reg; prototyping kit](https://www.infineon.com/CY8CPROTO-062-4343W) (`CY8CPROTO-062-4343W`)
-- [PSoC&trade; 6 Wi-Fi Bluetooth&reg; pioneer kit](https://www.infineon.com/CY8CKIT-062-WiFi-BT) (`CY8CKIT-062-WIFI-BT`) – Default value of `TARGET`
-- [PSoC&trade; 6 Bluetooth&reg; LE pioneer kit](https://www.infineon.com/CY8CKIT-062-BLE) (`CY8CKIT-062-BLE`)
+- [PSoC&trade; 6 Wi-Fi Bluetooth&reg; Prototyping Kit](https://www.infineon.com/CY8CPROTO-062-4343W) (`CY8CPROTO-062-4343W`)
+- [PSoC&trade; 6 Wi-Fi Bluetooth&reg; Pioneer Kit](https://www.infineon.com/CY8CKIT-062-WiFi-BT) (`CY8CKIT-062-WIFI-BT`) – Default value of `TARGET`
+- [PSoC&trade; 6 Bluetooth&reg; LE Pioneer Kit](https://www.infineon.com/CY8CKIT-062-BLE) (`CY8CKIT-062-BLE`)
+- [PSoC&trade; 62S2 Wi-Fi Bluetooth&reg; Pioneer Kit](https://www.infineon.com/CY8CKIT-062S2-43012) (`CY8CKIT-062S2-43012`)
+- [PSoC&trade; 62S1 Wi-Fi Bluetooth&reg; Pioneer Kit](https://www.infineon.com/CYW9P62S1-43438EVB-01) (`CYW9P62S1-43438EVB-01`)
+- [PSoC&trade; 62S1 Wi-Fi Bluetooth&reg; Pioneer Kit](https://www.infineon.com/CYW9P62S1-43012EVB-01) (`CYW9P62S1-43012EVB-01`)
+- [PSoC&trade; 64 "Secure Boot" Wi-Fi Bluetooth&reg; Pioneer Kit](https://www.infineon.com/CY8CKIT-064B0S2-4343W) (`CY8CKIT-064B0S2-4343W`)
+- [PSoC&trade; 62S2 Evaluation Kit](https://www.infineon.com/CY8CEVAL-062S2) (`CY8CEVAL-062S2`, `CY8CEVAL-062S2-LAI-4373M2`, `CY8CEVAL-062S2-MUR-43439M2`, `CY8CEVAL-062S2-LAI-43439M2`, `CY8CEVAL-062S2-MUR-4373EM2`)
 - [PSoC&trade; 6 Bluetooth&reg; LE prototyping kit](https://www.infineon.com/CY8CPROTO-063-BLE) (`CY8CPROTO-063-BLE`)
-- [PSoC&trade; 62S2 Wi-Fi Bluetooth&reg; pioneer kit](https://www.infineon.com/CY8CKIT-062S2-43012) (`CY8CKIT-062S2-43012`)
-- [PSoC&trade; 62S1 Wi-Fi Bluetooth&reg; pioneer kit](https://www.infineon.com/CYW9P62S1-43438EVB-01) (`CYW9P62S1-43438EVB-01`)
-- [PSoC&trade; 62S1 Wi-Fi Bluetooth&reg; pioneer kit](https://www.infineon.com/CYW9P62S1-43012EVB-01) (`CYW9P62S1-43012EVB-01`)
-- [PSoC&trade; 64 "Secure Boot" Wi-Fi Bluetooth&reg; pioneer kit](https://www.infineon.com/CY8CKIT-064B0S2-4343W) (`CY8CKIT-064B0S2-4343W`)
-- [PSoC&trade; 62S2 evaluation kit](https://www.infineon.com/CY8CEVAL-062S2) (`CY8CEVAL-062S2`, `CY8CEVAL-062S2-LAI-4373M2`, `CY8CEVAL-062S2-MUR-43439M2`)
 
 
 ## Hardware setup
 
-This code example requires the [TFT display shield board CY8CKIT-028-TFT](https://www.infineon.com/documentation/development-kitsboards/tft-display-shield-board-cy8ckit-028-tft), which has the audio codec. This board comes with CY8CKIT-062-WiFi-BT. It can also be purchased standalone and be used with any other Arduino-compatible PSoC&trade; 6 MCU kit.
+This code example requires the [TFT display shield board CY8CKIT-028-TFT](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-028-tft/), which has the audio codec. This board comes with CY8CKIT-062-WiFi-BT. It can also be purchased standalone and be used with any other Arduino-compatible PSoC&trade; 6 MCU kit.
 
 Alternatively, you can use a third-party module - [Pmod I2S2: Stereo audio input and output](https://store.digilentinc.com/pmod-i2s2-stereo-audio-input-and-output/) if you are using a prototyping kit, similar to CY8CPROTO-062-4343W.
 
@@ -54,14 +55,16 @@ If using the Pmod I2S2 module, make the following connections:
 
  I2S signal       | Kit pin    | Pmod IS2S pin
  :--------------- | :--------- | :---------------
- TX_SCK           | P5[1]      |   J1.2
+ TX_SCK           | P5[1]      |   J1.3
  TX_DATA          | P5[3]      |   J1.4
- TX_WS            | P5[2]      |   J1.3
+ TX_WS            | P5[2]      |   J1.2
  MCLK             | P5[0]      |   J1.1
  GND              | GND        |   GND
  VCC              | VTARG      |   VCC
 
 **Note:** If using CY8CPROTO-062-4343W, you can solder the Pmod I2S2 module to the kit's Pmod header J15.
+
+**Note:** If using CY8CPROTO-063-BLE, you can use jumper wires to connect the Pmod I2S2 module to the kit's header J2.
 
 **Note:** The PSoC&trade; 6 Bluetooth&reg; LE pioneer kit (CY8CKIT-062-BLE) and the PSoC&trade; 6 Wi-Fi Bluetooth&reg; pioneer kit (CY8CKIT-062-WIFI-BT) ship with KitProg2 installed. The ModusToolbox&trade; software requires KitProg3. Before using this code example, make sure that the board is upgraded to KitProg3. The tool and instructions are available in the [Firmware Loader](https://github.com/Infineon/Firmware-loader) GitHub repository. If you do not upgrade, you will see an error like "unable to find CMSIS-DAP device" or "KitProg firmware is out of date".
 
@@ -113,7 +116,7 @@ Argument | Description | Required/optional
 `--target-dir`| Specify the directory in which the application is to be created if you prefer not to use the default current working directory | Optional
 `--user-app-name`| Specify the name of the application if you prefer to have a name other than the example's default name | Optional
 
-<br />
+<br>
 
 The following example clones the "[mtb-example-psoc6-i2s](https://github.com/Infineon/mtb-example-psoc6-i2s)" application with the desired name "Psoc6I2s" configured for the *CY8CKIT-062-WIFI-BT* BSP into the specified working directory, *C:/mtb_projects*:
 
@@ -134,13 +137,13 @@ Argument | Description | Required/optional
 `--add-bsp-version`| Specify the version of the BSP that should be added to the application if you do not wish to use the latest from manifest | Optional
 `--add-bsp-location`| Specify the location of the BSP (local/shared) if you prefer to add the BSP in a shared path | Optional
 
-<br />
+<br>
 
 Following example adds the CY8CPROTO-062-4343W BSP to the already created application and makes it the active BSP for the app:
 
    ```
-   library-manager-cli --project "C:/mtb_projects/mtb-example-psoc6-i2s" --add-bsp-name CY8CKIT-062-WIFI-BT --add-bsp-version "latest-v4.X" --add-bsp-location "local"
-   library-manager-cli --project "C:/mtb_projects/mtb-example-psoc6-i2s" --set-active-bsp CY8CKIT-062-WIFI-BT
+   ~/ModusToolbox/tools_3.0/library-manager/library-manager-cli --project "C:/mtb_projects/mtb-example-psoc6-i2s" --add-bsp-name CY8CKIT-062-WIFI-BT --add-bsp-version "latest-v4.X" --add-bsp-location "local"
+   ~/ModusToolbox/tools_3.0/library-manager/library-manager-cli --project "C:/mtb_projects/mtb-example-psoc6-i2s" --set-active-bsp APP_CY8CKIT-062-WIFI-BT
    ```
 
 </details>
@@ -159,7 +162,7 @@ Use one of the following options:
 
    4. Click **Create** and follow the instructions printed in the bottom pane to import or open the exported project in the respective IDE.
 
-<br />
+<br>
 
 - **Use command-line interface (CLI):**
 
@@ -176,7 +179,10 @@ For a list of supported IDEs and more details, see the "Exporting to IDEs" secti
 
 ## Operation
 
-If using a PSoC&trade; 64 "Secure" MCU kit (like CY8CKIT-064B0S2-4343W), the PSoC&trade; 64 device must be provisioned with keys and policies before being programmed. Follow the instructions in the ["Secure Boot" SDK user guide](https://www.infineon.com/documentation/software-and-drivers/psoc-64-secure-mcu-secure-boot-sdk-user-guide) to provision the device. If the kit is already provisioned, copy-paste the keys and policy folder to the application folder.
+If using a PSoC&trade; 64 "Secure" MCU kit (like CY8CKIT-064B0S2-4343W), the PSoC&trade; 64 device must be provisioned with keys and policies before being programmed. Follow the instructions in the ["Secure Boot" SDK user guide](https://www.infineon.com/dgdlac/Infineon-PSoC_64_Secure_MCU_Secure_Boot_SDK_User_Guide-Software-v07_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0f8c361a7666) to provision the device. If the kit is already provisioned, copy-paste the keys and policy folder to the application folder.
+
+By default, the code example is configured to work with audio-codec-ak4954a (the macro `USE_AK4954A` is defined in the Makefile).
+CY8CPROTO-062-4343W and CY8CPROTO-063-BLE kits do not support audio-codec-ak4954a, but you can use a third-party module Pmod I2S2. Therefore, while building the code example for CY8CPROTO-062-4343W and CY8CPROTO-063-BLE, remove the macro `USE_AK4954A` definition from the Makefile.
 
 1. Connect the TFT display shield to the main board. If using the Pmod I2S2 module, connect to the prototyping kit.
 
@@ -195,7 +201,7 @@ If using a PSoC&trade; 64 "Secure" MCU kit (like CY8CKIT-064B0S2-4343W), the PSo
 
    <details><summary><b>Using CLI</b></summary>
 
-     From the terminal, execute the `make program` command to build and program the application using the default toolchain to the default target. The default toolchain and target are specified in the application's Makefile but you can override those values manually:
+     From the terminal, execute the `make program` command to build and program the application using the default toolchain to the default target. The default toolchain is specified in the application's Makefile but you can override this value manually:
       ```
       make program TOOLCHAIN=<toolchain>
       ```
@@ -217,15 +223,15 @@ You can debug the example to step through the code. In the IDE, use the **\<Appl
 
 ## Design and implementation
 
-The [CY8CKIT-028-TFT](https://www.infineon.com/documentation/development-kitsboards/tft-display-shield-board-cy8ckit-028-tft) contains the audio codec [AK4954A](https://www.akm.com/global/en/products/audio/audio-codec/ak4954aen/) and an audio jack. This allows you to listen any audio data stream transmitted to the audio codec over the I2S interface. You can connect a speaker or headphone to the audio jack.
+The [CY8CKIT-028-TFT](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-028-tft/) contains the audio codec [AK4954A](https://www.akm.com/content/dam/documents/products/audio/audio-codec/ak4954aen/ak4954aen-en-datasheet.pdf) and an audio jack. This allows you to listen to any audio data stream transmitted to the audio codec over the I2S interface. You can connect a speaker or headphones to the audio jack.
 
-PSoC&trade; 6 MCU streams the data over I2S. This is done by storing a short audio clip in the flash memory, and writing it to the Tx FIFO of the I2S hardware block. The *wave.h/c* files contain the audio data represented as a binary array. You can generate such a file by converting a WAV audio file to a C array. You can use the [bin2c tool](https://sourceforge.net/projects/bin2c/).
+PSoC&trade; 6 MCU streams the data over I2S. This is done by storing a short audio clip in the flash memory and writing it to the Tx FIFO of the I2S hardware block. The *wave.h/c* files contain the audio data represented as a binary array. You can generate such a file by converting a WAV audio file to a C array. You can use the [bin2c tool](https://sourceforge.net/projects/bin2c/).
 
 The I2S interface requires a continuous stream of data, which can be satisfied by writing to the Tx FIFO with DMA transfers, or with some code in the interrupt service routine (ISR). In this example, the CY HAL I2S asynchronous function takes care of transferring the data using an ISR.
 
 PSoC&trade; 6 MCU also provides the clock source for the audio codec. Based on the AK4954A datasheet, this codec requires a 4.096-MHz MCLK and a 1.024-MHz BCLK to sample at 16 kHz. The code example contains an I2C master, through which PSoC&trade; 6 MCU configures the audio codec. The code example includes the AK4954A library (*deps/audio-codec-ak4954a.mtb*) dependency to easily configure the AK4954A. If you do not desire to use the AK4954A, you can edit the Makefile to remove the line *DEFINES+=USE_AK4954A*.
 
-MCLK is generated by using a PWM running at the desired frequency. The clock used to source the PWM and the audio subsystem must be the same to avoid any synchronization issues. This example uses the PLL to source the CPU/peripherals and the audio subsystem. Note that the actual frequencies differ in the firmware, because the PLL cannot generate the exact desired frequency.
+MCLK is generated by using a PWM running at the desired frequency. The clock used to source the PWM and the audio subsystem must be the same to avoid any synchronization issues. This example uses the PLL to source the CPU/peripherals and the audio subsystem. Note that the actual frequencies differ in the firmware because the PLL cannot generate the exact desired frequency.
 
 **Note:** The desired frequency values set in this code example are not achievable by sourcing the PLL from the IMO (8 MHz). Therefore, slightly different values are enforced in the firmware to avoid issues during the initialization of the PWM and I2S.
 
@@ -245,22 +251,22 @@ MCLK is generated by using a PWM running at the desired frequency. The clock use
  Clock (HAL) | fll_clock | FLL clock object
  Clock (HAL) | system_clock | Feeds the system clock
 
-<br />
+<br>
 
 ## Related resources
 
 
 Resources  | Links
 -----------|----------------------------------
-Application notes  | [AN228571](https://www.infineon.com/AN228571) – Getting started with PSoC&trade; 6 MCU on ModusToolbox&trade; software <br>  [AN215656](https://www.infineon.com/AN215656) – PSoC&trade; 6 MCU: Dual-CPU system design <br>  [AN85951](https://www.infineon.com/AN85951) – PSoC&trade; 4 and PSoC&trade; 6 MCU CAPSENSE&trade; design guide
-Code examples  | [Using ModusToolbox&trade; software](https://github.com/Infineon/Code-Examples-for-ModusToolbox-Software) on GitHub <br> [Using PSoC&trade; Creator](https://www.infineon.com/documentation/code-examples/psoc-345-code-examples)
-Device documentation | [PSoC&trade; 6 MCU datasheets](https://www.infineon.com/cms/en/search.html#!view=downloads&term=PSoC%206&doc_group=Data%20Sheet) <br> [PSoC&trade; 6 technical reference manuals](https://www.infineon.com/cms/en/search.html#!view=downloads&term=PSoC%206&doc_group=Additional%20Technical%20Information)
-Development kits | Select your kits from the [evaluation board finder](https://www.infineon.com/cms/en/design-support/finder-selection-tools/product-finder/evaluation-board) page
-Libraries on GitHub   | [mtb-pdl-cat1](https://github.com/Infineon/mtb-pdl-cat1) – PSoC&trade; 6 peripheral driver library (PDL)  <br> [mtb-hal-cat1](https://github.com/Infineon/mtb-hal-cat1) – Hardware abstraction layer (HAL) library <br> [audio-codec-ak4954a](https://github.com/Infineon/audio-codec-ak4954a) - Provides functions to support use of AK4954A audio codec
-Middleware on GitHub  | [capsense](https://github.com/Infineon/capsense) – CAPSENSE&trade; library and documents <br> [psoc6-middleware](https://github.com/Infineon/modustoolbox-software#psoc-6-middleware-libraries) – Links to all PSoC&trade; 6 MCU middleware
+Application notes  | [AN228571](https://www.infineon.com/AN228571) – Getting started with PSoC&trade; 6 MCU on ModusToolbox&trade; software <br>  [AN215656](https://www.infineon.com/AN215656) – PSoC&trade; 6 MCU: Dual-CPU system design
+Code examples  | [Using ModusToolbox&trade; software](https://github.com/Infineon/Code-Examples-for-ModusToolbox-Software) on GitHub 
+Device documentation | [PSoC&trade; 6 MCU datasheets](https://documentation.infineon.com/html/psoc6/bnm1651211483724.html) <br> [PSoC&trade; 6 technical reference manuals](https://documentation.infineon.com/html/psoc6/zrs1651212645947.html)
+Development kits | Select your kits from the [evaluation board finder](https://www.infineon.com/cms/en/design-support/finder-selection-tools/product-finder/evaluation-board)
+Libraries on GitHub   | [mtb-pdl-cat1](https://github.com/Infineon/mtb-pdl-cat1) – PSoC&trade; 6 Peripheral Driver Library (PDL)  <br> [mtb-hal-cat1](https://github.com/Infineon/mtb-hal-cat1) – Hardware Abstraction Layer (HAL) library <br> [audio-codec-ak4954a](https://github.com/Infineon/audio-codec-ak4954a) - Provides functions to support the use of AK4954A audio codec
+Middleware on GitHub  | [psoc6-middleware](https://github.com/Infineon/modustoolbox-software#psoc-6-middleware-libraries) – Links to all PSoC&trade; 6 MCU middleware
 Tools  | [Eclipse IDE for ModusToolbox&trade; software](https://www.infineon.com/modustoolbox) – ModusToolbox&trade; software is a collection of easy-to-use software and tools enabling rapid development with Infineon MCUs, covering applications from embedded sense and control to wireless and cloud-connected systems using AIROC&trade; Wi-Fi and Bluetooth® connectivity devices
 
-<br />
+<br>
 
 ## Other resources
 
@@ -277,15 +283,16 @@ Document title: *CE218636* - *PSoC&trade; 6 MCU: Inter-IC sound (I2S) audio*
  ------- | ---------------------
  1.0.0   | New code example
  1.1.0   | Updated to support ModusToolbox&trade; software v2.1<br>Updated to use HAL drivers for the I2S block
- 2.0.0   | Major update to support ModusToolbox&trade; software v2.2, added support for new kits<br> This version is not backward compatible with ModusToolbox&trade; software v2.1<br> Added support to new kits  |
- 3.0.0   | Major update to support ModusToolbox&trade; v3.0 and BSPs   v4.X. <br>This version is not backward compatible with previous versions of ModusToolbox&trade;<br>|
+ 2.0.0   | Major update to support ModusToolbox&trade; software v2.2, added support for new kits<br> This version is not backward compatible with ModusToolbox&trade; software v2.1<br> Added support to new kits
+ 3.0.0   | Major update to support ModusToolbox&trade; v3.0 and BSPs   v4.X. <br>This version is not backward compatible with previous versions of ModusToolbox&trade;
+ 3.1.0   | Added support for CY8CEVAL-062S2-LAI-43439M2, and CY8CEVAL-062S2-MUR-4373EM2 kits
 
-<br />
+<br>
 
 ---------------------------------------------------------
 
-© Cypress Semiconductor Corporation, 2019-2022. This document is the property of Cypress Semiconductor Corporation, an Infineon Technologies company, and its affiliates ("Cypress").  This document, including any software or firmware included or referenced in this document ("Software"), is owned by Cypress under the intellectual property laws and treaties of the United States and other countries worldwide.  Cypress reserves all rights under such laws and treaties and does not, except as specifically stated in this paragraph, grant any license under its patents, copyrights, trademarks, or other intellectual property rights.  If the Software is not accompanied by a license agreement and you do not otherwise have a written agreement with Cypress governing the use of the Software, then Cypress hereby grants you a personal, non-exclusive, nontransferable license (without the right to sublicense) (1) under its copyright rights in the Software (a) for Software provided in source code form, to modify and reproduce the Software solely for use with Cypress hardware products, only internally within your organization, and (b) to distribute the Software in binary code form externally to end users (either directly or indirectly through resellers and distributors), solely for use on Cypress hardware product units, and (2) under those claims of Cypress’s patents that are infringed by the Software (as provided by Cypress, unmodified) to make, use, distribute, and import the Software solely for use with Cypress hardware products.  Any other use, reproduction, modification, translation, or compilation of the Software is prohibited.
-<br />
+© Cypress Semiconductor Corporation, 2019-2023. This document is the property of Cypress Semiconductor Corporation, an Infineon Technologies company, and its affiliates ("Cypress").  This document, including any software or firmware included or referenced in this document ("Software"), is owned by Cypress under the intellectual property laws and treaties of the United States and other countries worldwide.  Cypress reserves all rights under such laws and treaties and does not, except as specifically stated in this paragraph, grant any license under its patents, copyrights, trademarks, or other intellectual property rights.  If the Software is not accompanied by a license agreement and you do not otherwise have a written agreement with Cypress governing the use of the Software, then Cypress hereby grants you a personal, non-exclusive, nontransferable license (without the right to sublicense) (1) under its copyright rights in the Software (a) for Software provided in source code form, to modify and reproduce the Software solely for use with Cypress hardware products, only internally within your organization, and (b) to distribute the Software in binary code form externally to end users (either directly or indirectly through resellers and distributors), solely for use on Cypress hardware product units, and (2) under those claims of Cypress’s patents that are infringed by the Software (as provided by Cypress, unmodified) to make, use, distribute, and import the Software solely for use with Cypress hardware products.  Any other use, reproduction, modification, translation, or compilation of the Software is prohibited.
+<br>
 TO THE EXTENT PERMITTED BY APPLICABLE LAW, CYPRESS MAKES NO WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, WITH REGARD TO THIS DOCUMENT OR ANY SOFTWARE OR ACCOMPANYING HARDWARE, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  No computing device can be absolutely secure.  Therefore, despite security measures implemented in Cypress hardware or software products, Cypress shall have no liability arising out of any security breach, such as unauthorized access to or use of a Cypress product. CYPRESS DOES NOT REPRESENT, WARRANT, OR GUARANTEE THAT CYPRESS PRODUCTS, OR SYSTEMS CREATED USING CYPRESS PRODUCTS, WILL BE FREE FROM CORRUPTION, ATTACK, VIRUSES, INTERFERENCE, HACKING, DATA LOSS OR THEFT, OR OTHER SECURITY INTRUSION (collectively, "Security Breach").  Cypress disclaims any liability relating to any Security Breach, and you shall and hereby do release Cypress from any claim, damage, or other liability arising from any Security Breach.  In addition, the products described in these materials may contain design defects or errors known as errata which may cause the product to deviate from published specifications. To the extent permitted by applicable law, Cypress reserves the right to make changes to this document without further notice. Cypress does not assume any liability arising out of the application or use of any product or circuit described in this document. Any information provided in this document, including any sample design information or programming code, is provided only for reference purposes.  It is the responsibility of the user of this document to properly design, program, and test the functionality and safety of any application made of this information and any resulting product.  "High-Risk Device" means any device or system whose failure could cause personal injury, death, or property damage.  Examples of High-Risk Devices are weapons, nuclear installations, surgical implants, and other medical devices.  "Critical Component" means any component of a High-Risk Device whose failure to perform can be reasonably expected to cause, directly or indirectly, the failure of the High-Risk Device, or to affect its safety or effectiveness.  Cypress is not liable, in whole or in part, and you shall and hereby do release Cypress from any claim, damage, or other liability arising from any use of a Cypress product as a Critical Component in a High-Risk Device. You shall indemnify and hold Cypress, including its affiliates, and its directors, officers, employees, agents, distributors, and assigns harmless from and against all claims, costs, damages, and expenses, arising out of any claim, including claims for product liability, personal injury or death, or property damage arising from any use of a Cypress product as a Critical Component in a High-Risk Device. Cypress products are not intended or authorized for use as a Critical Component in any High-Risk Device except to the limited extent that (i) Cypress’s published data sheet for the product explicitly states Cypress has qualified the product for use in a specific High-Risk Device, or (ii) Cypress has given you advance written authorization to use the product as a Critical Component in the specific High-Risk Device and you have signed a separate indemnification agreement.
-<br />
-Cypress, the Cypress logo, and combinations thereof, WICED, ModusToolbox, PSoC, CapSense, EZ-USB, F-RAM, and Traveo are trademarks or registered trademarks of Cypress or a subsidiary of Cypress in the United States or in other countries. For a more complete list of Cypress trademarks, visit cypress.com. Other names and brands may be claimed as property of their respective owners.
+<br>
+Cypress, the Cypress logo, and combinations thereof, WICED, ModusToolbox, PSoC, CapSense, EZ-USB, F-RAM, and Traveo are trademarks or registered trademarks of Cypress or a subsidiary of Cypress in the United States or in other countries. For a more complete list of Cypress trademarks, visit www.infineon.com. Other names and brands may be claimed as property of their respective owners.
